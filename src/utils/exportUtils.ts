@@ -296,55 +296,7 @@ function drawText(
   state.currentY += totalHeight;
   return totalHeight;
 }
-// Robust certifications renderer - Line by line bullet format
-function renderCertificationsForPDF2(state: PageState, certifications: (string | Certification)[], PDF_CONFIG: any): number {
-  const filtered = (certifications || []).filter((c) => {
-    if (typeof c === 'string') return c.trim().length > 0 && !isPlaceholderText(c);
-    if (c && typeof c === 'object') {
-      const primary = toPlainText(c);
-      const desc = toPlainText((c as any)?.description);
-      return (!!primary && !isPlaceholderText(primary)) || (!!desc && !isPlaceholderText(desc));
-    }
-    return false;
-  });
-
-  if (!filtered.length) return 0;
-
-  let totalHeight = drawSectionTitle(state, 'Certifications', PDF_CONFIG);
-
-  // Extract certification titles/names dynamically from API data
-  const certNames: string[] = filtered.map((cert) => {
-    if (typeof cert === 'object' && cert !== null) {
-      const anyC: any = cert;
-      return toPlainText(anyC.title) || toPlainText(anyC) || toPlainText(anyC?.description) || '';
-    }
-    return toPlainText(cert);
-  }).filter(name => name.trim().length > 0);
-
-  if (!certNames.length) return totalHeight;
-
-  // Display each certification on its own line with bullet
-  certNames.forEach((certName) => {
-    if (!checkPageSpace(state, 12, PDF_CONFIG)) addNewPage(state, PDF_CONFIG);
-
-    const certHeight = drawText(
-      state,
-      `• ${certName}`,
-      PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent,
-      PDF_CONFIG,
-      {
-        fontSize: PDF_CONFIG.fonts.body.size,
-        maxWidth: PDF_CONFIG.contentWidth - PDF_CONFIG.spacing.bulletIndent
-      }
-    );
-    totalHeight += certHeight;
-    state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
-  });
-
-  return totalHeight;
-}
-
-// Alternative robust certifications renderer that safely stringifies fields
+// Certifications renderer with title + description structure
 function renderCertificationsForPDF(state: PageState, certifications: (string | Certification)[], PDF_CONFIG: any): number {
   // Accept strings or objects with any reasonable text field
   const filtered = (certifications || []).filter((c) => {
@@ -1020,6 +972,8 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
 
     if (userType === 'experienced' && resumeData.summary && resumeData.summary.trim() !== '') {
       drawProfessionalSummary(state, resumeData.summary, PDF_CONFIG);
+    } else if ((userType === 'student' || userType === 'fresher') && resumeData.careerObjective && resumeData.careerObjective.trim() !== '') {
+      drawCareerObjective(state, resumeData.careerObjective, PDF_CONFIG);
     }
 
     // Helper: draw section safely without breaking export
@@ -1034,14 +988,14 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
         safeDraw('WorkExperience', () => drawWorkExperience(state, resumeData.workExperience, userType, PDF_CONFIG));
         safeDraw('Projects', () => drawProjects(state, resumeData.projects, PDF_CONFIG));
         safeDraw('Education', () => drawEducation(state, resumeData.education, PDF_CONFIG));
-        safeDraw('Certifications', () => renderCertificationsForPDF2(state, getEffectiveCertifications(resumeData), PDF_CONFIG));
+        safeDraw('Certifications', () => renderCertificationsForPDF(state, getEffectiveCertifications(resumeData), PDF_CONFIG));
     } else if (userType === 'student') {
         // ATS Order: Career Objective → Education → Skills → Projects → Experience
         safeDraw('Education', () => drawEducation(state, resumeData.education, PDF_CONFIG));
         safeDraw('Skills', () => drawSkills(state, resumeData.skills, PDF_CONFIG));
         safeDraw('Projects', () => drawProjects(state, resumeData.projects, PDF_CONFIG));
         safeDraw('WorkExperience', () => drawWorkExperience(state, resumeData.workExperience, userType, PDF_CONFIG));
-        safeDraw('Certifications', () => renderCertificationsForPDF2(state, getEffectiveCertifications(resumeData), PDF_CONFIG));
+        safeDraw('Certifications', () => renderCertificationsForPDF(state, getEffectiveCertifications(resumeData), PDF_CONFIG));
         safeDraw('Achievements', () => drawAchievementsAndExtras(state, resumeData, PDF_CONFIG));
     } else { // Fresher
         // ATS Order: Career Objective → Skills → Experience → Projects → Education
@@ -1049,7 +1003,7 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
         safeDraw('WorkExperience', () => drawWorkExperience(state, resumeData.workExperience, userType, PDF_CONFIG));
         safeDraw('Projects', () => drawProjects(state, resumeData.projects, PDF_CONFIG));
         safeDraw('Education', () => drawEducation(state, resumeData.education, PDF_CONFIG));
-        safeDraw('Certifications', () => renderCertificationsForPDF2(state, getEffectiveCertifications(resumeData), PDF_CONFIG));
+        safeDraw('Certifications', () => renderCertificationsForPDF(state, getEffectiveCertifications(resumeData), PDF_CONFIG));
         safeDraw('Achievements', () => drawAchievementsAndExtras(state, resumeData, PDF_CONFIG));
     }
 
@@ -1321,6 +1275,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
     `;
   } else if (userType === 'student') {
     sectionOrderHtml = `
+      ${careerObjectiveHtml}
       ${educationHtml}
       ${skillsHtml}
       ${projectsHtml}
@@ -1331,6 +1286,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
     `;
   } else {
     sectionOrderHtml = `
+      ${careerObjectiveHtml}
       ${skillsHtml}
       ${workExperienceHtml}
       ${projectsHtml}

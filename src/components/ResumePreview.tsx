@@ -379,9 +379,9 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
     if (userType === 'experienced') {
       return ['summary', 'skills', 'workExperience', 'projects', 'education', 'certifications', 'additionalSections'];
     } else if (userType === 'student') {
-      return ['education', 'skills', 'projects', 'workExperience', 'certifications', 'achievementsAndExtras', 'additionalSections'];
+      return ['careerObjective', 'education', 'skills', 'projects', 'workExperience', 'certifications', 'achievementsAndExtras', 'additionalSections'];
     } else {
-      return ['skills', 'workExperience', 'projects', 'education', 'certifications', 'achievementsAndExtras', 'additionalSections'];
+      return ['careerObjective', 'skills', 'workExperience', 'projects', 'education', 'certifications', 'achievementsAndExtras', 'additionalSections'];
     }
   };
 
