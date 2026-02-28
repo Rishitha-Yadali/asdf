@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, ArrowLeft, Loader2, CheckCircle, AlertCircle, Send, BarChart3 } from 'lucide-react';
+import { FileText, ArrowLeft, Loader2, CheckCircle, AlertCircle, Send, BarChart3, Pencil, Eye, Download } from 'lucide-react';
 import { exportToPDF, exportToWord } from '../utils/exportUtils';
 import { ResumeData, UserType } from '../types/resume';
 import { ExportOptions, defaultExportOptions } from '../types/export';
@@ -35,6 +35,7 @@ interface MobileOptimizedInterfaceProps {
     overallAfter: number;
     improvement: number;
   } | null;
+  onEditResume?: () => void;
 }
 
 export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> = ({
@@ -44,7 +45,8 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
   jobContext,
   onApplyNow,
   jdOptimizationResult,
-  parameter16Scores
+  parameter16Scores,
+  onEditResume
 }) => {
   const hasScores = !!(jdOptimizationResult || parameter16Scores);
   const [activeTab, setActiveTab] = useState<'preview' | 'scores' | 'export'>('preview');
@@ -254,8 +256,7 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
                   </p>
                 </div>
               </div>
-              
-              {/* Apply Now Button - Show when from job application */}
+
               {jobContext?.fromJobApplication && onApplyNow && (
                 <button
                   onClick={onApplyNow}
@@ -268,13 +269,26 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
               )}
             </div>
 
+            {/* Action Buttons - Edit & Export */}
+            {onEditResume && (
+              <button
+                onClick={onEditResume}
+                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-emerald-500/30 text-white font-semibold rounded-xl transition-all duration-300"
+                style={{ minHeight: '52px', fontSize: '16px' }}
+              >
+                <Pencil className="w-5 h-5 text-emerald-400" />
+                <span>Edit Resume</span>
+              </button>
+            )}
+
             {/* Download Buttons */}
             <div className="space-y-4">
               <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white mb-4">
-                  Download Resume
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Download className="w-5 h-5 text-emerald-400" />
+                  Export Resume
                 </h3>
-                
+
                 <button
                   onClick={handleExportPDF}
                   disabled={isExportingPDF || isExportingWord}
@@ -314,7 +328,6 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
                 </button>
               </div>
 
-              {/* Export Status */}
               {exportStatus.status && (
                 <div className={`p-4 rounded-xl border ${
                   exportStatus.status === 'success'

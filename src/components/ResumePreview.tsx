@@ -227,23 +227,23 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
   const getShortLinkText = (url: string, type: 'linkedin' | 'github'): string => {
     if (!url) return '';
     const cleanUrl = url.trim().toLowerCase();
-    
+
     if (type === 'linkedin') {
       const linkedinMatch = cleanUrl.match(/linkedin\.com\/in\/([^\/\?]+)/i);
       if (linkedinMatch) {
-        return `linkedin.com/in/${linkedinMatch[1]}`;
+        return `linkedin/${linkedinMatch[1]}`;
       }
       return 'LinkedIn';
     }
-    
+
     if (type === 'github') {
       const githubMatch = cleanUrl.match(/github\.com\/([^\/\?]+)/i);
       if (githubMatch) {
-        return `github.com/${githubMatch[1]}`;
+        return `github/${githubMatch[1]}`;
       }
       return 'GitHub';
     }
-    
+
     return url;
   };
 
@@ -291,9 +291,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
       cursor: 'pointer',
     };
 
-    // Line 1: Phone, Email, Location
     const line1Parts: React.ReactNode[] = [];
-    // Line 2: LinkedIn, GitHub
     const line2Parts: React.ReactNode[] = [];
 
     if (isValidField(resumeData.phone, 'phone')) {
@@ -310,20 +308,13 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
         </a>
       );
     }
-    if (isValidField(resumeData.location, 'text')) {
-      line1Parts.push(
-        <span key="location" style={contactStyle}>
-          {resumeData.location}
-        </span>
-      );
-    }
     if (isValidField(resumeData.linkedin, 'url')) {
       let linkedinUrl = resumeData.linkedin!;
       if (!linkedinUrl.startsWith('http')) {
         linkedinUrl = `https://${linkedinUrl}`;
       }
       const shortText = getShortLinkText(resumeData.linkedin!, 'linkedin');
-      line2Parts.push(
+      line1Parts.push(
         <a key="linkedin" href={linkedinUrl} style={{...linkStyle, maxWidth: '200px'}} target="_blank" rel="noopener noreferrer">
           {shortText}
         </a>
@@ -335,7 +326,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
         githubUrl = `https://${githubUrl}`;
       }
       const shortText = getShortLinkText(resumeData.github!, 'github');
-      line2Parts.push(
+      line1Parts.push(
         <a key="github" href={githubUrl} style={{...linkStyle, maxWidth: '200px'}} target="_blank" rel="noopener noreferrer">
           {shortText}
         </a>
@@ -388,9 +379,9 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
     if (userType === 'experienced') {
       return ['summary', 'skills', 'workExperience', 'projects', 'education', 'certifications', 'additionalSections'];
     } else if (userType === 'student') {
-      return ['careerObjective', 'education', 'skills', 'projects', 'workExperience', 'certifications', 'achievementsAndExtras', 'additionalSections'];
-    } else { // 'fresher'
-      return ['careerObjective', 'skills', 'workExperience', 'projects', 'education', 'certifications', 'achievementsAndExtras', 'additionalSections'];
+      return ['education', 'skills', 'projects', 'workExperience', 'certifications', 'achievementsAndExtras', 'additionalSections'];
+    } else {
+      return ['skills', 'workExperience', 'projects', 'education', 'certifications', 'achievementsAndExtras', 'additionalSections'];
     }
   };
 

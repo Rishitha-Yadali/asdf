@@ -1085,6 +1085,7 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
         onApplyNow={() => handleExternalApply(optimizedResume)}
         jdOptimizationResult={jdOptimizationResult}
         parameter16Scores={parameter16Scores}
+        onEditResume={() => setEditorMode('edit')}
       />
     );
   }
@@ -1328,15 +1329,24 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
             )}
 
             {optimizedResume && editorMode === 'preview' && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-6">
-                  <button
-                    onClick={() => setShowExportModal(true)}
-                    className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-lg rounded-2xl shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 transition-all duration-300"
-                  >
-                    <Download className="w-6 h-6" />
-                    Export Resume
-                  </button>
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="lg:col-span-2 space-y-5">
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowExportModal(true)}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all duration-300"
+                    >
+                      <Download className="w-5 h-5" />
+                      Export Resume
+                    </button>
+                    <button
+                      onClick={() => setEditorMode('edit')}
+                      className="flex items-center justify-center gap-2 px-5 py-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-emerald-500/30 text-white font-semibold rounded-xl transition-all duration-300"
+                    >
+                      <Pencil className="w-4 h-4 text-emerald-400" />
+                      Edit
+                    </button>
+                  </div>
 
                   {jdOptimizationResult && (
                     <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden p-5">
@@ -1359,7 +1369,7 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
                   )}
                 </div>
 
-                <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
+                <div className="lg:col-span-3 lg:sticky lg:top-6 lg:self-start space-y-4">
                   <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
                     <ResumePreviewControls
                       zoom={previewZoom}

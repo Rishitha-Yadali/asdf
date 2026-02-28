@@ -489,24 +489,21 @@ function drawSectionTitle(state: PageState, title: string, PDF_CONFIG: any): num
 // Helper to extract short display text from URLs
 function getShortLinkText(url: string, type: 'linkedin' | 'github'): string {
   if (!url) return '';
-  
-  // Clean the URL
+
   const cleanUrl = url.trim().toLowerCase();
-  
+
   if (type === 'linkedin') {
-    // Extract username from LinkedIn URL
     const linkedinMatch = cleanUrl.match(/linkedin\.com\/in\/([^\/\?]+)/i);
     if (linkedinMatch) {
-      return `linkedin.com/in/${linkedinMatch[1]}`;
+      return `linkedin/${linkedinMatch[1]}`;
     }
     return 'LinkedIn';
   }
-  
+
   if (type === 'github') {
-    // Extract username from GitHub URL
     const githubMatch = cleanUrl.match(/github\.com\/([^\/\?]+)/i);
     if (githubMatch) {
-      return `github.com/${githubMatch[1]}`;
+      return `github/${githubMatch[1]}`;
     }
     return 'GitHub';
   }
@@ -526,33 +523,24 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
   // Line 2: LinkedIn, GitHub
   const line2Items: ContactItem[] = [];
   
-  // Add phone to line 1
   if (isValidField(resumeData.phone, 'phone')) {
     line1Items.push({ text: resumeData.phone!, url: `tel:${resumeData.phone}` });
   }
-  
-  // Add email to line 1
+
   if (isValidField(resumeData.email, 'email')) {
     line1Items.push({ text: resumeData.email!, url: `mailto:${resumeData.email}` });
   }
-  
-  // Add location to line 1
-  if (isValidField(resumeData.location, 'text')) {
-    line1Items.push({ text: resumeData.location! });
-  }
-  
-  // Add LinkedIn to line 2 with short form
+
   if (isValidField(resumeData.linkedin, 'url')) {
     const linkedinUrl = resumeData.linkedin!.startsWith('http') ? resumeData.linkedin! : `https://${resumeData.linkedin}`;
     const shortText = getShortLinkText(resumeData.linkedin!, 'linkedin');
-    line2Items.push({ text: shortText, url: linkedinUrl });
+    line1Items.push({ text: shortText, url: linkedinUrl });
   }
-  
-  // Add GitHub to line 2 with short form
+
   if (isValidField(resumeData.github, 'url')) {
     const githubUrl = resumeData.github!.startsWith('http') ? resumeData.github! : `https://${resumeData.github}`;
     const shortText = getShortLinkText(resumeData.github!, 'github');
-    line2Items.push({ text: shortText, url: githubUrl });
+    line1Items.push({ text: shortText, url: githubUrl });
   }
 
   if (line1Items.length === 0 && line2Items.length === 0) return 0;
@@ -609,13 +597,7 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
     totalHeight += lineHeight;
   };
   
-  // Draw line 1 (phone, email, location)
   drawContactLine(line1Items);
-  
-  // Draw line 2 (LinkedIn, GitHub) if there are items
-  if (line2Items.length > 0) {
-    drawContactLine(line2Items);
-  }
   
   // Reset font to normal
   state.doc.setFont(PDF_CONFIG.fontFamily, 'normal');
@@ -1038,8 +1020,6 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
 
     if (userType === 'experienced' && resumeData.summary && resumeData.summary.trim() !== '') {
       drawProfessionalSummary(state, resumeData.summary, PDF_CONFIG);
-    } else if ((userType === 'student' || userType === 'fresher') && resumeData.careerObjective && resumeData.careerObjective.trim() !== '') {
-      drawCareerObjective(state, resumeData.careerObjective, PDF_CONFIG);
     }
 
     // Helper: draw section safely without breaking export
@@ -1172,7 +1152,6 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
   addContactFieldHtml('Email', data.email, 'email', 'mailto');
   addContactFieldHtml('LinkedIn', data.linkedin, 'url', 'http');
   addContactFieldHtml('GitHub', data.github, 'url', 'http');
-  addContactFieldHtml('Location', data.location, 'text');
 
   const contactInfo = contactParts.join(' | ');
 
@@ -1341,9 +1320,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       ${additionalSectionsHtml}
     `;
   } else if (userType === 'student') {
-    // ATS-Compliant Order: Career Objective → Education → Skills → Projects → Experience
     sectionOrderHtml = `
-      ${careerObjectiveHtml}
       ${educationHtml}
       ${skillsHtml}
       ${projectsHtml}
@@ -1352,10 +1329,8 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       ${achievementsHtml}
       ${additionalSectionsHtml}
     `;
-  } else { // Fresher
-    // ATS-Compliant Order: Career Objective → Skills → Experience → Projects → Education
+  } else {
     sectionOrderHtml = `
-      ${careerObjectiveHtml}
       ${skillsHtml}
       ${workExperienceHtml}
       ${projectsHtml}

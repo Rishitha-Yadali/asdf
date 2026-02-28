@@ -1162,38 +1162,21 @@ export class FullResumeRewriter16ParameterService {
   /**
    * Add ALL soft skills from JD
    */
-  private static optimizeSoftSkillsAggressive(resume: ResumeData, jdAnalysis: JDAnalysis): RewriteChange[] {
+  private static optimizeSoftSkillsAggressive(resume: ResumeData, _jdAnalysis: JDAnalysis): RewriteChange[] {
     const changes: RewriteChange[] = [];
-    
-    if (!resume.skills) {
-      resume.skills = [];
-    }
-    
-    // Find or create Soft Skills category
-    let softCategory = resume.skills.find(s => s.category.toLowerCase().includes('soft'));
-    
-    if (!softCategory) {
-      softCategory = { category: 'Soft Skills', count: 0, list: [] };
-      resume.skills.push(softCategory);
-    }
-    
-    const existingSoft = new Set(softCategory.list.map(s => s.toLowerCase()));
-    
-    // Add all JD soft skills
-    jdAnalysis.softSkills.forEach(skill => {
-      if (!existingSoft.has(skill.toLowerCase())) {
-        const formatted = skill.charAt(0).toUpperCase() + skill.slice(1);
-        softCategory!.list.push(formatted);
-        
+
+    if (resume.skills) {
+      const beforeCount = resume.skills.length;
+      resume.skills = resume.skills.filter(s => !s.category.toLowerCase().includes('soft'));
+      if (resume.skills.length < beforeCount) {
         changes.push({
           section: 'skills',
           parameter: 'Skills Match (Soft Skills)',
-          changeType: 'added',
-          after: formatted,
-          description: `Added soft skill: ${formatted}`,
+          changeType: 'removed',
+          description: 'Removed soft skills category for cleaner professional output',
         });
       }
-    });
+    }
     
     softCategory.count = softCategory.list.length;
     return changes;
@@ -2531,61 +2514,9 @@ export class FullResumeRewriter16ParameterService {
     return changes;
   }
 
-  // 5. Soft Skills Optimization
-  private static optimizeSoftSkills(resume: ResumeData, jdAnalysis: JDAnalysis): RewriteChange[] {
-    const changes: RewriteChange[] = [];
-    
-    // Soft skills are typically demonstrated in bullets, not listed
-    // We'll inject them into experience bullets
-    
-    if (!resume.workExperience || jdAnalysis.softSkills.length === 0) return changes;
-    
-    const softSkillPhrases: Record<string, string[]> = {
-      'communication': ['effectively communicated', 'presented to stakeholders', 'documented and shared'],
-      'teamwork': ['collaborated with cross-functional teams', 'partnered with', 'worked closely with'],
-      'collaboration': ['collaborated with', 'partnered across teams', 'coordinated with'],
-      'leadership': ['led a team of', 'mentored junior developers', 'guided the team'],
-      'problem-solving': ['resolved complex issues', 'troubleshot and fixed', 'identified and solved'],
-      'adaptability': ['quickly adapted to', 'learned and implemented', 'pivoted to'],
-      'time management': ['delivered ahead of schedule', 'managed multiple priorities', 'met tight deadlines'],
-    };
-    
-    let softSkillIndex = 0;
-    
-    resume.workExperience.forEach((exp, expIndex) => {
-      if (!exp.bullets || exp.bullets.length === 0) return;
-      
-      // Add soft skill demonstration to one bullet per experience
-      const targetBulletIndex = expIndex % exp.bullets.length;
-      const bullet = exp.bullets[targetBulletIndex];
-      
-      // Check if bullet already has soft skill language
-      const hasSoftSkill = Object.values(softSkillPhrases).flat().some(phrase => 
-        bullet.toLowerCase().includes(phrase.toLowerCase().split(' ')[0])
-      );
-      
-      if (!hasSoftSkill && jdAnalysis.softSkills[softSkillIndex]) {
-        const softSkill = jdAnalysis.softSkills[softSkillIndex];
-        const phrases = softSkillPhrases[softSkill.toLowerCase()] || [`demonstrated ${softSkill}`];
-        const phrase = phrases[0];
-        
-        const oldBullet = bullet;
-        exp.bullets[targetBulletIndex] = `${bullet.replace(/\.?\s*$/, '')}, ${phrase}.`;
-        
-        changes.push({
-          section: 'experience',
-          parameter: 'Skills Match (Soft Skills)',
-          changeType: 'enhanced',
-          before: oldBullet,
-          after: exp.bullets[targetBulletIndex],
-          description: `Added soft skill demonstration: ${softSkill}`,
-        });
-        
-        softSkillIndex++;
-      }
-    });
-    
-    return changes;
+  // 5. Soft Skills Optimization - disabled (soft skills removed from output)
+  private static optimizeSoftSkills(_resume: ResumeData, _jdAnalysis: JDAnalysis): RewriteChange[] {
+    return [];
   }
 
 

@@ -218,165 +218,109 @@ SECTION ORDER FOR FRESHERS:
   const promptContent = `${getPromptForUserType(userType)}
 
 CRITICAL REQUIREMENTS FOR BULLET POINTS:
-1. Each bullet point MUST be concise, containing maximum 9-10 words only.
-2. Include at least 30 relevant keywords from the job description across all bullet points.
+1. Each bullet point MUST be concise, containing maximum 10 words only.
+2. Include relevant keywords from the job description across all bullet points.
 3. Use STRONG ACTION VERBS only (no weak verbs like "helped", "assisted", "worked on", "was responsible for", "participated in", "involved in", "contributed to")
 4. Start each bullet with powerful verbs like: Developed, Implemented, Architected, Optimized, Engineered, Designed, Led, Managed, Created, Built, Delivered, Achieved, Increased, Reduced, Streamlined, Automated, Transformed, Executed, Spearheaded, Established
 5. Ensure no word is repeated more than twice across all bullet points within a section.
 
-QUANTIFIED ACHIEVEMENTS - MANDATORY (CRITICAL):
-6. EVERY bullet point MUST contain at least ONE quantified metric. NO EXCEPTIONS.
+METRIC RULES - REALISTIC AND SPARSE (CRITICAL):
+6. NOT every bullet needs a metric. Use metrics SPARINGLY and REALISTICALLY:
+   - Maximum 1-2 bullets with metrics PER work experience entry (out of 3 bullets)
+   - Maximum 1 bullet with a metric PER project entry (out of 2-3 bullets)
+   - The remaining bullets should describe WHAT was built/done with SPECIFIC technical details
 7. If original resume has metrics, PRESERVE them exactly (40%, $1M, 10,000+ users).
-8. If original resume has NO metrics, GENERATE realistic metrics based on:
-   - Role type (intern vs senior)
-   - Company size (startup vs enterprise)
-   - Industry standards
-9. Types of metrics to use (vary across bullets):
-   - Percentages: "improved by 35%", "reduced by 40%", "increased by 25%"
-   - Numbers: "10,000+ users", "50+ APIs", "100+ test cases", "5 team members"
-   - Time: "within 2 weeks", "3x faster", "reduced from 5 days to 1 day"
-   - Currency: "$50K savings", "$1M revenue impact"
-   - Scale: "serving 1M+ requests/day", "processing 10K transactions"
-10. METRIC PLACEMENT: Put the metric at the END of the bullet for impact.
-    GOOD: "Developed REST APIs using Node.js, reducing response time by 40%"
-    BAD: "Developed REST APIs using Node.js for the backend system"
-11. For freshers/students with no metrics, use realistic estimates:
-    - "Improved page load time by 30%" (for frontend projects)
-    - "Reduced API response time by 25%" (for backend work)
-    - "Achieved 95% test coverage" (for testing)
-    - "Processed 1000+ records daily" (for data work)
-    - "Collaborated with 5+ team members" (for teamwork)
+8. NEVER generate exaggerated or unrealistic metrics:
+   - NEVER claim "99.9% uptime" unless the person was a lead/principal engineer on infra
+   - NEVER claim "10,000+ users" for intern or junior-level projects
+   - NEVER use vague filler phrases like "enhancing overall outcomes" or "optimizing overall performance"
+   - Interns: max "500 users", "15% improvement", "3 team members"
+   - Junior devs: max "2,000 users", "25% improvement", "5 team members"
+   - Mid-level: max "10,000 users", "40% improvement"
+   - Senior: use realistic enterprise-scale numbers
+9. Metrics should be SPECIFIC, not generic. NEVER use these patterns:
+   - "successfully enhancing overall outcomes" (too vague)
+   - "effectively optimizing overall performance" (too vague)
+   - "significantly reducing overall costs" (too vague)
+   - Any phrase with "overall" + generic noun is BANNED
+10. GOOD metric bullets: "Reduced API latency from 800ms to 200ms" or "Processed 500 daily orders using Kafka"
+11. GOOD non-metric bullets: "Built authentication module using JWT and OAuth2" or "Designed normalized database schema with 15 tables"
 
-12. Focus on tangible RESULTS and measurable IMPACT, not just tasks or responsibilities.
-13. MANDATORY: Each work experience entry MUST have EXACTLY 3 bullet points - no more, no less.
-14. MANDATORY: Each project entry MUST have EXACTLY 2-3 bullet points - no less than 2.
-15. All section titles MUST be in ALL CAPS (e.g., WORK EXPERIENCE, EDUCATION, PROJECTS).
-16. Dates should be on the same line as roles/education, using the exact format "Jan 2023 – Mar 2024".
-17. Integrate keywords naturally and contextually within sentences, avoiding keyword stuffing.
-18. Ensure at least 70% of resume keywords match the job description for better ATS compatibility.
-19. Avoid using subjective adjectives like "passionate", "dedicated", or "hardworking" unless backed by achievements.
-20. If user provides minimal information for work experience, EXPAND and GENERATE 3 meaningful bullets with metrics.
+12. Focus on SPECIFIC technical details, not generic impact claims.
+13. MANDATORY: Each work experience entry MUST have EXACTLY 3 bullet points.
+14. MANDATORY: Each project entry MUST have EXACTLY 2-3 bullet points.
+15. All section titles MUST be in ALL CAPS.
+16. Dates should use the exact format "Jan 2023 - Mar 2024".
+17. Integrate keywords naturally and contextually, avoiding keyword stuffing.
+18. Ensure at least 70% of resume keywords match the job description.
+19. NEVER use subjective adjectives like "passionate", "dedicated", "hardworking", "dynamic", "results-driven".
+20. If user provides minimal info, EXPAND with SPECIFIC technical details, not generic impact phrases.
+
+BANNED PHRASES (NEVER USE THESE):
+- "successfully enhancing overall outcomes"
+- "effectively optimizing overall performance"
+- "significantly reducing overall costs"
+- "dramatically improving overall efficiency"
+- Any variation of "[adverb] + [verb]ing + overall + [noun]"
+- "resulting in enhanced productivity"
+- "ensuring seamless integration"
+- "fostering collaborative environment"
+- "leveraging cutting-edge technologies"
+- "driving innovation across"
 
 METRIC PRESERVATION RULES (CRITICAL - DO NOT VIOLATE):
 1. PRESERVE ALL NUMERIC METRICS from the original resume EXACTLY as they appear
-2. If a bullet contains "40% improvement", "10,000+ users", "$1M revenue", or any quantifiable metric, it MUST appear in the optimized bullet
-3. DO NOT change, round, or approximate any numbers (e.g., don't change "10,000" to "10K" or "40%" to "substantial")
-4. If you cannot naturally integrate a metric while rewriting, keep the original phrasing
-5. Metrics include: percentages (40%), multipliers (2x), currency ($1M), scale (10,000+), time (3 months), quantities (5 engineers)
-6. NEVER remove impact metrics to make room for keywords
+2. DO NOT change, round, or approximate any numbers
+3. If you cannot naturally integrate a metric while rewriting, keep the original phrasing
+4. NEVER remove impact metrics to make room for keywords
 
 CONTEXTUAL KEYWORD INSERTION RULES:
 1. Maximum 2 job description keywords per bullet point
 2. Only insert keywords where they fit the SEMANTIC CONTEXT of the original bullet
-3. Do NOT insert keywords at the start of bullets (avoid keyword stuffing detection)
-4. If a bullet is about backend systems, only add backend-related JD keywords (not frontend/AI terms)
-5. If semantic context doesn't match, DO NOT force keyword insertion
-6. Use keyword variations and synonyms to maintain natural flow
+3. Do NOT insert keywords at the start of bullets
+4. If semantic context doesn't match, DO NOT force keyword insertion
 
-STAR FORMAT ENFORCEMENT (EVERY BULLET MUST FOLLOW THIS):
-1. Format: [Action Verb] + [What you did] + [Technology/Tool] + [Quantified Result]
-2. EVERY bullet MUST end with a metric (%, number, time, or scale)
-3. Examples of CORRECT bullets:
-   - "Developed REST APIs using Node.js and Express, reducing response time by 40%"
-   - "Built React dashboard for analytics, serving 5,000+ daily active users"
-   - "Automated deployment pipeline with Jenkins, cutting release time from 2 hours to 15 minutes"
-   - "Implemented caching with Redis, improving query performance by 60%"
-   - "Led team of 4 developers to deliver project 2 weeks ahead of schedule"
-4. Examples of WRONG bullets (NO METRICS - DO NOT GENERATE THESE):
-   - "Developed REST APIs using Node.js and Express" (missing metric)
-   - "Built React dashboard for analytics" (missing metric)
-   - "Worked on deployment pipeline" (weak verb + no metric)
-5. If you cannot add a metric, the bullet is INCOMPLETE - add one!
-
-WORD VARIETY - NO REPETITION (CRITICAL FOR ATS):
+WORD VARIETY - NO REPETITION (CRITICAL):
 1. NEVER use the same action verb to start more than 2 bullets across the ENTIRE resume
-2. NEVER repeat the same word more than 3 times across all bullets (excluding common words like "the", "and", "with")
-3. Use SYNONYMS to vary your vocabulary:
-   - Instead of "Developed" multiple times, use: Built, Created, Engineered, Designed, Implemented, Constructed
-   - Instead of "Improved" multiple times, use: Enhanced, Optimized, Boosted, Elevated, Refined, Streamlined
-   - Instead of "Managed" multiple times, use: Led, Directed, Oversaw, Coordinated, Supervised, Administered
-   - Instead of "Analyzed" multiple times, use: Evaluated, Assessed, Examined, Investigated, Reviewed
-   - Instead of "Collaborated" multiple times, use: Partnered, Teamed, Cooperated, Worked with, Joined forces
-4. Track your word usage - if you've used "developed" twice, switch to "built" or "created"
-5. Each bullet should feel UNIQUE - avoid repetitive sentence structures
-6. BAD EXAMPLE (repetitive):
-   - "Developed REST APIs using Node.js..."
-   - "Developed frontend components using React..."
-   - "Developed database schemas using PostgreSQL..."
-7. GOOD EXAMPLE (varied):
-   - "Engineered REST APIs using Node.js..."
-   - "Built responsive frontend components using React..."
-   - "Designed optimized database schemas using PostgreSQL..."
+2. NEVER repeat the same word more than 3 times across all bullets
+3. NEVER use the same sentence structure pattern for consecutive bullets
+4. Each bullet MUST feel distinct in both vocabulary and structure
 
 HALLUCINATION PREVENTION:
-1. ONLY use technologies, tools, and frameworks mentioned in the original resume OR job description
+1. ONLY use technologies mentioned in the original resume OR job description
 2. DO NOT invent project names, company names, or technical terms
-3. If the resume mentions "React", do not add "Angular" unless it's in the JD and contextually relevant
-4. Stick to facts from the original resume - enhance presentation, not content
+3. Stick to facts from the original resume - enhance presentation, not content
 
-PROJECT STRUCTURING REQUIREMENTS (MANDATORY):
-1. EVERY project MUST follow this exact structure:
-   - Project Title with Role (e.g., "E-commerce Platform - Backend Developer")
-   - One-line problem statement or context
-   - 2-3 impact bullets with VERB + TECH + IMPACT + METRIC pattern
-   - One mandatory "Tech Used:" bullet listing ALL technologies
-
-2. "Tech Used:" bullet MUST include:
-   - Main programming languages (e.g., Java, Python, JavaScript)
-   - Frameworks and libraries (e.g., React, Spring Boot, Django)
-   - Databases (e.g., MySQL, PostgreSQL, MongoDB)
-   - Infrastructure/DevOps tools (e.g., Docker, Kubernetes, AWS, Jenkins)
-   - Architecture patterns when relevant (e.g., microservices, REST API, event-driven)
-
-3. Example compliant project:
-   Payment Gateway Integration - Backend Developer
-   Built secure payment processing system for e-commerce platform.
-   • Developed RESTful API using Node.js and Express handling 50,000+ daily transactions
-   • Implemented fraud detection algorithms reducing false positives by 45%
-   • Integrated Stripe and PayPal APIs achieving 99.9% uptime
-   • Tech Used: Node.js, Express, MongoDB, Redis, Docker, AWS Lambda, Stripe API, RESTful architecture
+PROJECT STRUCTURING REQUIREMENTS:
+1. Project Title (e.g., "E-commerce Platform")
+2. 2-3 impact bullets with VERB + TECH + specific detail pattern
+3. Only 1 bullet per project should have a metric; others describe technical specifics
 
 CERTIFICATION EXPANSION REQUIREMENTS:
 1. Expand ALL abbreviated certification names to full official titles
-2. Examples of correct expansions:
-   - "AWS Certified" → "AWS Certified Solutions Architect - Associate"
-   - "Azure Fundamentals" → "Microsoft Certified: Azure Fundamentals"
-   - "CKA" → "Certified Kubernetes Administrator (CKA)"
-   - "PMP" → "Project Management Professional (PMP)"
-3. Include certification provider in the title (AWS, Microsoft, Google Cloud, etc.)
-4. Add level designation when applicable (Associate, Professional, Expert, Specialist)
+2. Include certification provider in the title
 
-JOB TITLE PLACEMENT REQUIREMENTS (CRITICAL):
-1. Job title from JD MUST appear in these locations:
-   - In the targetRole field (header section)
-   - In the first sentence of Professional Summary or Career Objective
-   - At least once in Work Experience role titles OR Project titles
+JOB TITLE PLACEMENT REQUIREMENTS:
+1. Job title from JD MUST appear in targetRole field and Professional Summary
 2. Use exact job title wording from the JD when possible
-3. If job title is "Senior Java Developer", mention "Java Developer" role explicitly
 
 KEYWORD FREQUENCY REQUIREMENTS:
 1. Extract top 5-10 technical skills from the job description
-2. Each top skill should appear 4-6 times naturally across:
-   - Skills section (1 time)
-   - Summary/Objective (0-1 times)
-   - Work Experience bullets (1-2 times)
-   - Projects bullets (2-3 times)
-3. Distribute keywords across different sections, not clustered
-4. Ensure keywords fit semantic context of each bullet
+2. Distribute keywords across different sections naturally
+3. Ensure keywords fit semantic context of each bullet
 
 WORD COUNT REQUIREMENTS (STRICT):
 1. Professional Summary: 40-60 words
-2. Career Objective: 30-50 words
-3. Each bullet point: maximum 10 words
-4. Total resume target: 400-650 words
-5. DO NOT exceed these limits
+2. Each bullet point: maximum 10 words
+3. Total resume target: 400-650 words
+4. DO NOT exceed these limits
 
-SKILLS REQUIREMENTS: (Generate comprehensive skills based on the resume content and job description)
-1. Include at least 6-8 distinct skill categories.
-2. Each category should contain 5-8 specific, relevant skills.
-4. Match skills to job requirements and industry standards
-5. Include both technical and soft skills relevant to the role
-6.TO GENERATE SOFT SKILLS according jd
+SKILLS REQUIREMENTS:
+1. Include 4-6 distinct TECHNICAL skill categories only
+2. Each category should contain 5-8 specific, relevant skills
+3. NEVER include version numbers (Python, not Python 3.11; React, not React 18)
+4. DO NOT include a "Soft Skills" category - only technical skills
+5. Match skills to job requirements and industry standards
 
 CERTIFICATIONS REQUIREMENTS (CRITICAL):
 1. For EACH certification, provide a concise 15-word description in the 'description' field
@@ -574,7 +518,6 @@ ${additionalSections && additionalSections.length > 0 ? `Additional Sections Pro
         'Data Science & ML': [],
         'Testing & QA': [],
         'Tools & Platforms': [],
-        'Soft Skills': []
       };
       
       // Helper function to extract skills from various formats
@@ -621,11 +564,8 @@ ${additionalSections && additionalSections.length > 0 ? `Additional Sections Pro
             return;
           }
 
-          // 2. Check soft skills (highest priority for non-technical)
+          // 2. Skip soft skills entirely - do not include in output
           if (SOFT_SKILLS.some(s => skillLower.includes(s))) {
-            if (!reorganizedSkills['Soft Skills'].includes(skill)) {
-              reorganizedSkills['Soft Skills'].push(skill);
-            }
             return;
           }
 
@@ -703,15 +643,14 @@ ${additionalSections && additionalSections.length > 0 ? `Additional Sections Pro
         'Data Science & ML',
         'Testing & QA',
         'Tools & Platforms',
-        'Soft Skills'
       ];
       
       parsedResult.skills = categoryOrder
         .filter(category => reorganizedSkills[category].length > 0)
         .map(category => ({
           category,
-          count: reorganizedSkills[category].length,
-          list: reorganizedSkills[category]
+          count: deduplicateSkills(reorganizedSkills[category]).length,
+          list: deduplicateSkills(reorganizedSkills[category])
         }));
       
       console.log('   - Reorganized skills:', parsedResult.skills.map((s: any) => `${s.category}: ${s.count}`));
