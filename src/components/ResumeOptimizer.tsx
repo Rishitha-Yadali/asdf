@@ -3,11 +3,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { FileText, AlertCircle, Plus, Sparkles, ArrowLeft, X, Send, Briefcase, Building2, Target, Zap, CheckCircle, Pencil, Eye } from 'lucide-react';
+import { FileText, AlertCircle, Plus, Sparkles, ArrowLeft, X, Send, Briefcase, Building2, Target, Zap, CheckCircle, Pencil, Eye, Download } from 'lucide-react';
 import { AnimatedCard, GradientButton, FloatingParticles, ChristmasSnow } from './ui';
 import { ResumePreview } from './ResumePreview';
 import { Parameter16ScoreDisplay } from './Parameter16ScoreDisplay';
-import { ResumeExportSettings } from './ResumeExportSettings';
 import { ProjectAnalysisModal } from './ProjectAnalysisModal';
 import { MobileOptimizedInterface } from './MobileOptimizedInterface';
 import { ProjectEnhancement } from './ProjectEnhancement';
@@ -28,7 +27,6 @@ import { ExportOptions, defaultExportOptions } from '../types/export';
 import { exportToPDF, exportToWord } from '../utils/exportUtils';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
-import { ExportButtons } from './ExportButtons';
 import { ResumePreviewControls } from './ResumePreviewControls';
 import { FullScreenPreviewModal } from './FullScreenPreviewModal';
 import { jobsService } from '../services/jobsService';
@@ -44,6 +42,7 @@ import { MissingSections, arrayToMissingSections } from '../types/edenai';
 import { runOptimizationLoop, OptimizationSessionResult } from '../services/optimizationLoopController';
 import ScoreDeltaDisplay from './ScoreDeltaDisplay';
 import ResumeEditor from './editor/ResumeEditor';
+import ExportResumeModal from './ExportResumeModal';
 
 // src/components/ResumeOptimizer.tsx
 const cleanResumeText = (text: string): string => {
@@ -212,6 +211,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
 
   const [optimizationInterrupted, setOptimizationInterrupted] = useState(false);
   const [jobApplicationLink, setJobApplicationLink] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const [previewZoom, setPreviewZoom] = useState(0.8);
   const [showFullScreenPreview, setShowFullScreenPreview] = useState(false);
@@ -244,6 +244,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
     setOptimizationInterrupted(false);
     setJdOptimizationResult(null);
     setEditorMode('preview');
+    setShowExportModal(false);
   }, []);
 
   const checkSubscriptionStatus = useCallback(async () => { // Memoize
@@ -1313,23 +1314,13 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
                     </div>
                   </div>
 
-                  <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
-                    <div className="bg-gradient-to-r from-slate-800/80 to-slate-900/80 p-4 border-b border-slate-700/50">
-                      <h2 className="text-lg font-semibold text-white flex items-center">
-                        <FileText className="w-4 h-4 mr-2 text-emerald-400" />
-                        Export
-                      </h2>
-                    </div>
-                    <div className="p-4">
-                      <ExportButtons
-                        resumeData={optimizedResume}
-                        userType={userType}
-                        onShowProfile={onShowProfile}
-                        walletRefreshKey={walletRefreshKey}
-                        exportOptions={exportOptions}
-                      />
-                    </div>
-                  </div>
+                  <button
+                    onClick={() => setShowExportModal(true)}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all duration-300"
+                  >
+                    <Download className="w-5 h-5" />
+                    Export Resume
+                  </button>
                 </div>
               </div>
             )}
@@ -1337,34 +1328,14 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
             {optimizedResume && editorMode === 'preview' && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-6">
-                  <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
-                    <div className="bg-gradient-to-r from-slate-800/80 to-slate-900/80 p-4 border-b border-slate-700/50">
-                      <h2 className="text-xl font-semibold text-white flex items-center">
-                        <FileText className="w-5 h-5 mr-2 text-emerald-400" />
-                        Export Resume
-                      </h2>
-                    </div>
-                    <div className="p-6 space-y-6">
-                      <ExportButtons
-                        resumeData={optimizedResume}
-                        userType={userType}
-                        onShowProfile={onShowProfile}
-                        walletRefreshKey={walletRefreshKey}
-                        exportOptions={exportOptions}
-                      />
-                      <ResumeExportSettings
-                        resumeData={optimizedResume}
-                        userType={userType}
-                        onExport={handleExportFile}
-                        showInlinePreview={false}
-                        initialOptions={exportOptions}
-                        onOptionsChange={setExportOptions}
-                      />
-                    </div>
-                  </div>
-                </div>
+                  <button
+                    onClick={() => setShowExportModal(true)}
+                    className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-lg rounded-2xl shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 transition-all duration-300"
+                  >
+                    <Download className="w-6 h-6" />
+                    Export Resume
+                  </button>
 
-                <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
                   {jdOptimizationResult && (
                     <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden p-5">
                       <ScoreDeltaDisplay
@@ -1384,7 +1355,9 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
                       compact={true}
                     />
                   )}
+                </div>
 
+                <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
                   <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
                     <ResumePreviewControls
                       zoom={previewZoom}
@@ -1627,6 +1600,13 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
         resumeData={optimizedResume || { name: '', phone: '', email: '', linkedin: '', github: '', education: [], workExperience: [], projects: [], skills: [], certifications: [] }}
         userType={userType}
         exportOptions={exportOptions}
+      />
+
+      <ExportResumeModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        resumeData={optimizedResume || { name: '', phone: '', email: '', linkedin: '', github: '', education: [], workExperience: [], projects: [], skills: [], certifications: [] }}
+        userType={userType}
       />
     </div>
   );
