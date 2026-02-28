@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { FileText, ArrowLeft, Loader2, CheckCircle, AlertCircle, Send } from 'lucide-react';
+import { FileText, ArrowLeft, Loader2, CheckCircle, AlertCircle, Send, BarChart3 } from 'lucide-react';
 import { exportToPDF, exportToWord } from '../utils/exportUtils';
 import { ResumeData, UserType } from '../types/resume';
 import { ExportOptions, defaultExportOptions } from '../types/export';
+import type { OptimizationSessionResult } from '../services/optimizationLoopController';
+import ScoreDeltaDisplay from './ScoreDeltaDisplay';
+import { Parameter16ScoreDisplay } from './Parameter16ScoreDisplay';
 
 interface Section {
   id: string;
@@ -17,7 +20,6 @@ interface MobileOptimizedInterfaceProps {
   sections: Section[];
   onStartNewResume: () => void;
   exportOptions?: ExportOptions;
-  // Job application props
   jobContext?: {
     jobId?: string;
     roleTitle?: string;
@@ -25,16 +27,27 @@ interface MobileOptimizedInterfaceProps {
     fromJobApplication?: boolean;
   } | null;
   onApplyNow?: () => void;
+  jdOptimizationResult?: OptimizationSessionResult | null;
+  parameter16Scores?: {
+    beforeScores: any[];
+    afterScores: any[];
+    overallBefore: number;
+    overallAfter: number;
+    improvement: number;
+  } | null;
 }
 
-export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> = ({ 
-  sections, 
+export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> = ({
+  sections,
   onStartNewResume,
   exportOptions = defaultExportOptions,
   jobContext,
-  onApplyNow
+  onApplyNow,
+  jdOptimizationResult,
+  parameter16Scores
 }) => {
-  const [activeTab, setActiveTab] = useState<'preview' | 'export'>('preview');
+  const hasScores = !!(jdOptimizationResult || parameter16Scores);
+  const [activeTab, setActiveTab] = useState<'preview' | 'scores' | 'export'>('preview');
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingWord, setIsExportingWord] = useState(false);
   const [exportStatus, setExportStatus] = useState<{
@@ -131,6 +144,19 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
           >
             Preview
           </button>
+          {hasScores && (
+            <button
+              onClick={() => setActiveTab('scores')}
+              className={`flex-1 py-4 text-base font-medium transition-colors ${
+                activeTab === 'scores'
+                  ? 'text-emerald-400 border-b-2 border-emerald-400'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              style={{ minHeight: '44px' }}
+            >
+              Scores
+            </button>
+          )}
           <button
             onClick={() => setActiveTab('export')}
             className={`flex-1 py-4 text-base font-medium transition-colors ${
@@ -147,7 +173,31 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
 
       {/* Content */}
       <div className="px-4 py-6">
-        {activeTab === 'preview' ? (
+        {activeTab === 'scores' && hasScores ? (
+          <div className="space-y-4">
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-700/50 p-4">
+              <h2 className="text-lg font-bold text-white mb-4 flex items-center">
+                <BarChart3 className="w-5 h-5 mr-2 text-emerald-400" />
+                Score Improvements
+              </h2>
+              {jdOptimizationResult ? (
+                <ScoreDeltaDisplay
+                  result={jdOptimizationResult}
+                  userActionCards={jdOptimizationResult.gapClassification.userActionCards}
+                />
+              ) : parameter16Scores ? (
+                <Parameter16ScoreDisplay
+                  beforeScores={parameter16Scores.beforeScores}
+                  afterScores={parameter16Scores.afterScores}
+                  overallBefore={parameter16Scores.overallBefore}
+                  overallAfter={parameter16Scores.overallAfter}
+                  improvement={parameter16Scores.improvement}
+                  compact={true}
+                />
+              ) : null}
+            </div>
+          </div>
+        ) : activeTab === 'preview' ? (
           <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-700/50 p-3 sm:p-4">
             <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center">
               <FileText className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-emerald-400" />

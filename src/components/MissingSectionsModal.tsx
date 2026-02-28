@@ -87,9 +87,18 @@ export const MissingSectionsModal: React.FC<MissingSectionsModalProps> = ({
     { category: '', count: 0, list: [] }
   ]);
   const [skillInputs, setSkillInputs] = useState<string[]>(['']);
-  const [education, setEducation] = useState<Education[]>([
-    { degree: '', school: '', year: '', cgpa: '', location: '' }
-  ]);
+  const [education, setEducation] = useState<Education[]>(() => {
+    if (currentResumeData?.education?.length > 0 && missingSections.some(s => s.startsWith('education:'))) {
+      return currentResumeData.education.map((edu: any) => ({
+        degree: edu.degree || '',
+        school: edu.school || edu.institution || '',
+        year: edu.year || '',
+        cgpa: edu.cgpa || edu.gpa || '',
+        location: edu.location || '',
+      }));
+    }
+    return [{ degree: '', school: '', year: '', cgpa: '', location: '' }];
+  });
   const [certifications, setCertifications] = useState<string[]>(['']);
   const [contactDetails, setContactDetails] = useState<ContactDetails>({
     phone: '',

@@ -1077,12 +1077,14 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
       }
     ];
     return (
-      <MobileOptimizedInterface 
-        sections={mobileSections} 
-        onStartNewResume={handleStartNewResume} 
+      <MobileOptimizedInterface
+        sections={mobileSections}
+        onStartNewResume={handleStartNewResume}
         exportOptions={exportOptions}
         jobContext={jobContext}
         onApplyNow={() => handleExternalApply(optimizedResume)}
+        jdOptimizationResult={jdOptimizationResult}
+        parameter16Scores={parameter16Scores}
       />
     );
   }

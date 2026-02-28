@@ -359,6 +359,10 @@ function addPerformanceWords(resume: ResumeData): OptimizationChange[] {
     exp.bullets = exp.bullets?.map(b => fixBullet(b, 'experience')) || [];
   });
 
+  resume.projects?.forEach(proj => {
+    proj.bullets = proj.bullets?.map(b => fixBullet(b, 'projects')) || [];
+  });
+
   return changes;
 }
 
@@ -394,20 +398,56 @@ function fixBulletFormatting(resume: ResumeData): OptimizationChange[] {
 function addProjectTechStacks(resume: ResumeData, jobDescription: string): OptimizationChange[] {
   const changes: OptimizationChange[] = [];
   const jdLower = jobDescription.toLowerCase();
-  const techSkills = ['react', 'node.js', 'python', 'typescript', 'aws', 'docker', 'postgresql', 'mongodb', 'redis', 'graphql', 'rest', 'kubernetes', 'terraform', 'jest', 'cypress'];
+  const techSkills = [
+    'react', 'react.js', 'next.js', 'nextjs', 'vue', 'vue.js', 'angular', 'svelte',
+    'node.js', 'nodejs', 'express', 'express.js', 'fastify', 'nestjs',
+    'python', 'django', 'flask', 'fastapi',
+    'java', 'spring', 'spring boot', 'springboot',
+    'typescript', 'javascript', 'go', 'golang', 'rust', 'c++', 'c#', '.net',
+    'aws', 'azure', 'gcp', 'google cloud',
+    'docker', 'kubernetes', 'k8s', 'terraform', 'jenkins', 'ci/cd',
+    'postgresql', 'postgres', 'mysql', 'mongodb', 'redis', 'elasticsearch',
+    'graphql', 'rest', 'restful', 'grpc',
+    'jest', 'cypress', 'selenium', 'pytest',
+    'kafka', 'rabbitmq', 'microservices',
+    'html', 'css', 'tailwind', 'sass', 'bootstrap',
+    'git', 'github', 'gitlab', 'jira', 'agile', 'scrum',
+    'sql', 'nosql', 'firebase', 'supabase',
+    'machine learning', 'deep learning', 'tensorflow', 'pytorch', 'nlp',
+    'linux', 'nginx', 'apache'
+  ];
   const jdTech = techSkills.filter(t => jdLower.includes(t));
 
+  const capitalize = (t: string) => t.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
   resume.projects?.forEach(proj => {
+    const projectText = [proj.title, ...(proj.bullets || []), ...(proj.techStack || [])].join(' ').toLowerCase();
+    const missingTech = jdTech.filter(t => !projectText.includes(t));
+
     if (!proj.techStack || proj.techStack.length === 0) {
-      const projectText = [proj.title, ...(proj.bullets || [])].join(' ').toLowerCase();
       const relevantTech = jdTech.filter(t => projectText.includes(t));
-      if (relevantTech.length === 0 && jdTech.length > 0) {
-        proj.techStack = jdTech.slice(0, 4).map(t => t.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-        changes.push({ parameterId: 20, section: 'projects', before: '', after: proj.techStack.join(', '), description: `Added tech stack to "${proj.title}"` });
-      } else if (relevantTech.length > 0) {
-        proj.techStack = relevantTech.map(t => t.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-        changes.push({ parameterId: 20, section: 'projects', before: '', after: proj.techStack.join(', '), description: `Added detected tech stack to "${proj.title}"` });
+      if (relevantTech.length > 0) {
+        proj.techStack = relevantTech.map(capitalize);
+      } else if (jdTech.length > 0) {
+        proj.techStack = jdTech.slice(0, 4).map(capitalize);
       }
+      if (proj.techStack && proj.techStack.length > 0) {
+        changes.push({ parameterId: 20, section: 'projects', before: '', after: proj.techStack.join(', '), description: `Added tech stack to "${proj.title}"` });
+      }
+    } else if (missingTech.length > 0) {
+      const toAdd = missingTech.slice(0, 3).map(capitalize);
+      const before = proj.techStack.join(', ');
+      proj.techStack = [...proj.techStack, ...toAdd];
+      changes.push({ parameterId: 20, section: 'projects', before, after: proj.techStack.join(', '), description: `Extended tech stack for "${proj.title}"` });
+    }
+
+    if (missingTech.length > 0 && proj.bullets && proj.bullets.length > 0) {
+      const techToMention = missingTech.slice(0, 2).map(capitalize);
+      const lastBulletIdx = proj.bullets.length - 1;
+      const originalBullet = proj.bullets[lastBulletIdx];
+      const techStr = techToMention.join(' and ');
+      proj.bullets[lastBulletIdx] = `${originalBullet.replace(/\.?\s*$/, '')}, leveraging ${techStr}.`;
+      changes.push({ parameterId: 19, section: 'projects', before: originalBullet, after: proj.bullets[lastBulletIdx], description: `Added JD skills to project bullet in "${proj.title}"` });
     }
   });
 
