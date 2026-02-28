@@ -32,7 +32,7 @@ import { FullScreenPreviewModal } from './FullScreenPreviewModal';
 import { jobsService } from '../services/jobsService';
 
 // NEW: EdenAI and enhanced services imports
-import { parseResumeFromFile, ParsedResume } from '../services/edenResumeParserService';
+import { parseResumeFromFile, ParsedResume } from '../services/geminiResumeParserService';
 import { summarizeJd } from '../services/jdSummarizerService';
 import { matchProjectsToJd, extractJdKeywords, ProjectMatchResult } from '../services/projectMatchingEngine';
 import { processResumeText } from '../services/edenModerationService';

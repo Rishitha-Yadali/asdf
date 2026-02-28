@@ -16,7 +16,7 @@ import {
   Skill,
   Certification,
 } from '../types/resume';
-import { edenai } from './aiProxyService';
+import { openrouter } from './aiProxyService';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -267,9 +267,11 @@ export class EnhancedResumeParserService {
     console.log('🔍 Enhanced OCR extraction via Supabase proxy...');
 
     try {
-      const extractedText = await edenai.extractText(file);
-      
-      // edenai.extractText returns a string, wrap it in expected format
+      const { parseFile } = await import('../utils/fileParser');
+      const fileResult = await parseFile(file);
+      const extractedText = fileResult.text;
+
+      // parseFile returns structured result, wrap it in expected format
       return {
         text: extractedText,
         confidence: extractedText.length > 500 ? 0.85 : 0.7,
@@ -651,8 +653,7 @@ Extract ACTUAL data from the resume. Do NOT use placeholder values.`;
     
     try {
       // Use proxy service for chat
-      const content = await edenai.chat(prompt, {
-        provider: 'openai/gpt-4o-mini',
+      const content = await openrouter.chat(prompt, {
         temperature: 0.05,
         maxTokens: 4000,
       });

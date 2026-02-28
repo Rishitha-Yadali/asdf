@@ -71,12 +71,12 @@ export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
 export const WORKER_API_URL = import.meta.env.VITE_WORKER_API_URL || '';
 
 // ======================
-// AI SERVICES (if exposed to frontend)
+// AI SERVICES (all routed through OpenRouter/Gemini via Edge Function)
 // ======================
-export const EDENAI_API_KEY = import.meta.env.VITE_EDENAI_API_KEY || '';
 export const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '';
-export const DEEPSEEK_API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || '';
-export const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+export const EDENAI_API_KEY = '';
+export const DEEPSEEK_API_KEY = '';
+export const GEMINI_API_KEY = '';
 
 // ======================
 // GITHUB

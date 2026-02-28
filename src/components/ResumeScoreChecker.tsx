@@ -60,7 +60,7 @@ import { FileUpload } from './FileUpload';
 import { ATSScoreChecker16Parameter, ATSScore16Parameter } from '../services/atsScoreChecker16Parameter';
 import { LoadingAnimation } from './LoadingAnimation';
 import { ScoringMode, ExtractionResult } from '../types/resume';
-import { ParsedResume } from '../services/edenResumeParserService';
+import { ParsedResume } from '../services/geminiResumeParserService';
 import type { Subscription } from '../types/payment';
 import { paymentService } from '../services/paymentService';
 import { useLocation } from 'react-router-dom';

@@ -1,11 +1,13 @@
-// src/services/edenaiProxyService.ts
-// Re-exports from unified aiProxyService for backward compatibility
+import { openrouter } from './aiProxyService';
+import { parseFile } from '../utils/fileParser';
 
-import { edenai } from './aiProxyService';
+export const extractTextWithOCR = async (file: File): Promise<string> => {
+  const result = await parseFile(file);
+  return result.text;
+};
 
-export const extractTextWithOCR = edenai.extractText.bind(edenai);
-export const chatWithAI = edenai.chat.bind(edenai);
-export const summarizeText = edenai.summarize.bind(edenai);
+export const chatWithAI = openrouter.chat.bind(openrouter);
+export const summarizeText = openrouter.summarize.bind(openrouter);
 
 export const edenaiProxyService = {
   extractTextWithOCR,

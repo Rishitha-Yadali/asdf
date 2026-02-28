@@ -1,6 +1,4 @@
-import { edenAITextService } from './edenAITextService';
-
-console.log('GeminiServiceWrapper: Using EdenAI for text generation');
+import { openrouter } from './aiProxyService';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -9,14 +7,23 @@ interface Message {
 
 class GeminiServiceWrapper {
   async generateText(prompt: string): Promise<string> {
-    return edenAITextService.generateTextWithRetry(prompt, {
+    return openrouter.chat(prompt, {
       temperature: 0.3,
       maxTokens: 4000
     });
   }
 
   async chat(messages: Message[]): Promise<string> {
-    return edenAITextService.chat(messages, {
+    const systemMessage = messages.find(m => m.role === 'system')?.content || '';
+    const lastMessage = messages[messages.length - 1];
+
+    if (systemMessage) {
+      return openrouter.chatWithSystem(systemMessage, lastMessage.content, {
+        temperature: 0.3,
+      });
+    }
+
+    return openrouter.chat(lastMessage.content, {
       temperature: 0.3,
       maxTokens: 4000
     });

@@ -18,7 +18,7 @@ import { InputSection } from './InputSection';
 import { UserType } from '../types/resume';
 import { User as AuthUser } from '../types/auth';
 import { ExtractionResult, ScoringMode } from '../types/resume';
-import { ParsedResume } from '../services/edenResumeParserService';
+import { ParsedResume } from '../services/geminiResumeParserService';
 
 interface InputWizardProps {
   extractionResult: ExtractionResult;

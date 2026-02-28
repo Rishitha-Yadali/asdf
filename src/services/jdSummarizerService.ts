@@ -1,7 +1,7 @@
 // src/services/jdSummarizerService.ts
-// JD Summarization Service using EdenAI via Supabase Edge Function proxy
+// JD Summarization Service using Gemini 2.5 Flash via OpenRouter
 
-import { edenai } from './aiProxyService';
+import { openrouter } from './aiProxyService';
 
 export interface JdSummary {
   summary: string;
@@ -22,10 +22,10 @@ export const summarizeJd = async (jobDescription: string): Promise<string> => {
   }
 
   try {
-    const summary = await edenai.summarize(jobDescription, 'medium');
+    const summary = await openrouter.summarize(jobDescription, 'medium');
     return summary.trim();
   } catch (error: any) {
-    console.error('EdenAI JD Summarization error:', error);
+    console.error('JD Summarization error:', error);
     return '';
   }
 };

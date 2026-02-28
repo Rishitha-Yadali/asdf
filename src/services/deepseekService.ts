@@ -1,88 +1,11 @@
-const DEEPSEEK_API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY;
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
-
-interface DeepSeekMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-interface DeepSeekRequest {
-  model: string;
-  messages: DeepSeekMessage[];
-  temperature?: number;
-  max_tokens?: number;
-  stream?: boolean;
-}
-
-interface DeepSeekResponse {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  choices: Array<{
-    index: number;
-    message: DeepSeekMessage;
-    finish_reason: string;
-  }>;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
+import { openrouter } from './aiProxyService';
 
 class DeepSeekService {
-  private apiKey: string;
-
-  constructor() {
-    if (!DEEPSEEK_API_KEY) {
-      console.warn('DeepSeek API key not configured. AI features will be disabled.');
-      this.apiKey = '';
-    } else {
-      this.apiKey = DEEPSEEK_API_KEY;
-    }
-  }
-
-  private async callDeepSeek(messages: DeepSeekMessage[], temperature = 0.7, maxTokens = 2000): Promise<string> {
-    if (!this.apiKey) {
-      throw new Error('DeepSeek API key is not configured. Please add VITE_DEEPSEEK_API_KEY to your environment variables.');
-    }
-
-    try {
-      const requestBody: DeepSeekRequest = {
-        model: 'deepseek-chat',
-        messages,
-        temperature,
-        max_tokens: maxTokens,
-        stream: false,
-      };
-
-      const response = await fetch(DEEPSEEK_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('DeepSeek API error:', errorText);
-        throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
-      }
-
-      const data: DeepSeekResponse = await response.json();
-
-      if (!data.choices || data.choices.length === 0) {
-        throw new Error('No response from DeepSeek API');
-      }
-
-      return data.choices[0].message.content.trim();
-    } catch (error) {
-      console.error('Error calling DeepSeek API:', error);
-      throw error;
-    }
+  private async callAI(systemPrompt: string, userPrompt: string, temperature = 0.7): Promise<string> {
+    return openrouter.chatWithSystem(systemPrompt, userPrompt, {
+      model: 'google/gemini-2.5-flash',
+      temperature,
+    });
   }
 
   async polishJobDescription(params: {
@@ -119,12 +42,7 @@ Please provide an improved version that:
 Improved Description:`;
 
     try {
-      const polishedDescription = await this.callDeepSeek([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ], 0.7, 1500);
-
-      return polishedDescription;
+      return await this.callAI(systemPrompt, userPrompt, 0.7);
     } catch (error) {
       console.error('Error polishing job description:', error);
       throw new Error('Failed to polish job description. Please try again later.');
@@ -161,12 +79,7 @@ Create a description that:
 Company Description:`;
 
     try {
-      const companyDescription = await this.callDeepSeek([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ], 0.8, 500);
-
-      return companyDescription;
+      return await this.callAI(systemPrompt, userPrompt, 0.8);
     } catch (error) {
       console.error('Error generating company description:', error);
       return `${companyName} is a dynamic organization seeking talented professionals to join their team. This ${roleTitle} position offers an excellent opportunity to work with cutting-edge technologies and contribute to impactful projects. The ideal candidate will bring their expertise in ${domain} to help drive innovation and success.`;
@@ -184,10 +97,7 @@ ${jobDescription.substring(0, 2000)}
 Provide a comma-separated list of 15-25 most important keywords:`;
 
     try {
-      const keywordsText = await this.callDeepSeek([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ], 0.5, 300);
+      const keywordsText = await this.callAI(systemPrompt, userPrompt, 0.5);
 
       const keywords = keywordsText
         .split(',')
@@ -232,12 +142,7 @@ Keep tips concise (1-2 sentences each) and practical.
 Interview Tips:`;
 
     try {
-      const tips = await this.callDeepSeek([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ], 0.7, 700);
-
-      return tips;
+      return await this.callAI(systemPrompt, userPrompt, 0.7);
     } catch (error) {
       console.error('Error generating interview tips:', error);
       return `Prepare thoroughly for your ${roleTitle} interview by reviewing core ${domain} concepts, practicing common technical questions, and being ready to discuss your relevant projects and experience. Research ${companyName} and prepare thoughtful questions about the role and team.`;
@@ -245,7 +150,7 @@ Interview Tips:`;
   }
 
   isConfigured(): boolean {
-    return !!this.apiKey;
+    return true;
   }
 }
 

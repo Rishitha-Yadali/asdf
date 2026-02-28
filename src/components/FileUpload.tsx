@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Upload, AlertCircle, CheckCircle, X, Sparkles, Quote, CreditCard } from 'lucide-react';
 import { ExtractionResult } from '../types/resume';
-import { parseResumeFromFile, ParsedResume } from '../services/edenResumeParserService';
+import { parseResumeFromFile, ParsedResume } from '../services/geminiResumeParserService';
 import { paymentService } from '../services/paymentService';
 
 // ATS Tips/Quotes for resume parsing
