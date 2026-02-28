@@ -41,6 +41,9 @@ import { processResumeText } from '../services/edenModerationService';
 import { ProjectMatchingPanel } from './ProjectMatchingPanel';
 import { MissingSections, arrayToMissingSections } from '../types/edenai';
 
+import { runOptimizationLoop, OptimizationSessionResult } from '../services/optimizationLoopController';
+import ScoreDeltaDisplay from './ScoreDeltaDisplay';
+
 // src/components/ResumeOptimizer.tsx
 const cleanResumeText = (text: string): string => {
   let cleaned = text;
@@ -161,6 +164,8 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
     improvement?: number;
   } | null>(null);
 
+  const [jdOptimizationResult, setJdOptimizationResult] = useState<OptimizationSessionResult | null>(null);
+
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
   const [showProjectMismatch, setShowProjectMismatch] = useState(false);
   
@@ -235,6 +240,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
     setCurrentStep(0);
     setActiveTab('resume');
     setOptimizationInterrupted(false);
+    setJdOptimizationResult(null);
   }, []);
 
   const checkSubscriptionStatus = useCallback(async () => { // Memoize
@@ -508,24 +514,58 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
           origin: 'jd_optimized'
         };
         
-        // Store user actions required for 90%+ score
         if (optimizationResult.userActionsRequired && optimizationResult.userActionsRequired.length > 0) {
           setUserActionsRequired(optimizationResult.userActionsRequired);
         } else {
           setUserActionsRequired([]);
         }
-        
-        // NEW: Store 16-parameter scores if available
-        // The scores are embedded in the optimization result from the 16-parameter rewriter
+
         if (optimizationResult.parameter16Scores) {
           setParameter16Scores(optimizationResult.parameter16Scores);
         } else {
-          // Generate basic scores from the optimization result
           setParameter16Scores({
             overallBefore: optimizationResult.beforeScore?.overall || 0,
             overallAfter: optimizationResult.afterScore?.overall || 0,
             improvement: optimizationResult.scoreImprovement || 0,
           });
+        }
+
+        try {
+          const loopResult = await runOptimizationLoop(
+            finalOptimizedResume,
+            currentJobDescription,
+            (msg, pct) => console.log(`[OptLoop] ${pct}% - ${msg}`)
+          );
+          setJdOptimizationResult(loopResult);
+          finalOptimizedResume = loopResult.optimizedResume;
+
+          if (loopResult.gapClassification.userActionCards.length > 0) {
+            setUserActionsRequired(loopResult.gapClassification.userActionCards);
+          }
+
+          if (user) {
+            try {
+              await supabase.from('optimization_sessions').insert({
+                user_id: user.id,
+                resume_text: reconstructResumeText(resumeData),
+                job_description: currentJobDescription,
+                before_score: loopResult.beforeScore.overallScore,
+                after_score: loopResult.afterScore.overallScore,
+                before_parameters: loopResult.beforeScore.parameters,
+                after_parameters: loopResult.afterScore.parameters,
+                category_deltas: loopResult.categoryDeltas,
+                gap_classification: loopResult.gapClassification,
+                changes_applied: loopResult.totalChanges,
+                iterations_count: loopResult.iterations.length,
+                reached_target: loopResult.reachedTarget,
+                processing_time_ms: loopResult.processingTimeMs,
+              });
+            } catch (dbErr) {
+              console.warn('Failed to persist optimization session:', dbErr);
+            }
+          }
+        } catch (loopErr) {
+          console.warn('20-parameter optimization loop failed, using base optimization:', loopErr);
         }
       } else {
         // Fallback: Use parsed resume directly if no JD provided
@@ -1250,8 +1290,16 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
 
                 {/* Right Panel - Sticky Resume Preview */}
                 <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
-                  {/* 16-Parameter Score Display */}
-                  {parameter16Scores && (
+                  {jdOptimizationResult && (
+                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden p-5">
+                      <ScoreDeltaDisplay
+                        result={jdOptimizationResult}
+                        userActionCards={jdOptimizationResult.gapClassification.userActionCards}
+                      />
+                    </div>
+                  )}
+
+                  {!jdOptimizationResult && parameter16Scores && (
                     <Parameter16ScoreDisplay
                       beforeScores={parameter16Scores.beforeScores}
                       afterScores={parameter16Scores.afterScores}
