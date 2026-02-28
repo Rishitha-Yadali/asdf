@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { FileText, AlertCircle, Plus, Sparkles, ArrowLeft, X, Send, Briefcase, Building2, Target, Zap, CheckCircle } from 'lucide-react';
+import { FileText, AlertCircle, Plus, Sparkles, ArrowLeft, X, Send, Briefcase, Building2, Target, Zap, CheckCircle, Pencil, Eye } from 'lucide-react';
 import { AnimatedCard, GradientButton, FloatingParticles, ChristmasSnow } from './ui';
 import { ResumePreview } from './ResumePreview';
 import { Parameter16ScoreDisplay } from './Parameter16ScoreDisplay';
@@ -43,6 +43,7 @@ import { MissingSections, arrayToMissingSections } from '../types/edenai';
 
 import { runOptimizationLoop, OptimizationSessionResult } from '../services/optimizationLoopController';
 import ScoreDeltaDisplay from './ScoreDeltaDisplay';
+import ResumeEditor from './editor/ResumeEditor';
 
 // src/components/ResumeOptimizer.tsx
 const cleanResumeText = (text: string): string => {
@@ -137,6 +138,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
   const [isCalculatingScore, setIsCalculatingScore] = useState(false);
   const [isProcessingMissingSections, setIsProcessingMissingSections] = useState(false);
   const [activeTab, setActiveTab] = useState<'resume'>('resume');
+  const [editorMode, setEditorMode] = useState<'preview' | 'edit'>('preview');
   const [currentStep, setCurrentStep] = useState(0);
 
   const [showProjectAnalysis, setShowProjectAnalysis] = useState(false);
@@ -241,6 +243,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
     setActiveTab('resume');
     setOptimizationInterrupted(false);
     setJdOptimizationResult(null);
+    setEditorMode('preview');
   }, []);
 
   const checkSubscriptionStatus = useCallback(async () => { // Memoize
@@ -1245,7 +1248,7 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
               </div>
             )}
 
-            <div className="text-center flex flex-col items-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
               <button
                 onClick={handleStartNewResume}
                 className="inline-flex items-center space-x-2 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/50 hover:border-emerald-500/30 text-white font-semibold py-2 px-4 rounded-xl shadow-lg transition-all duration-300"
@@ -1253,11 +1256,86 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
                 <ArrowLeft className="w-4 h-4" />
                 <span>Create New Resume</span>
               </button>
+
+              <div className="flex items-center bg-slate-800/60 rounded-xl border border-slate-700/50 p-1">
+                <button
+                  onClick={() => setEditorMode('preview')}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    editorMode === 'preview'
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </button>
+                <button
+                  onClick={() => setEditorMode('edit')}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    editorMode === 'edit'
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit Resume
+                </button>
+              </div>
             </div>
 
-            {optimizedResume && (
+            {optimizedResume && editorMode === 'edit' && (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="xl:col-span-2">
+                  <ResumeEditor
+                    resumeData={optimizedResume}
+                    onUpdate={(updated) => setOptimizedResume(updated)}
+                  />
+                </div>
+
+                <div className="space-y-6 xl:sticky xl:top-6 xl:self-start">
+                  <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
+                    <div className="bg-gradient-to-r from-slate-800/80 to-slate-900/80 p-4 border-b border-slate-700/50">
+                      <h2 className="text-lg font-semibold text-white flex items-center">
+                        <Eye className="w-4 h-4 mr-2 text-emerald-400" />
+                        Live Preview
+                      </h2>
+                    </div>
+                    <div className="bg-slate-800/20 p-3 flex items-center justify-center" style={{ minHeight: '400px' }}>
+                      <div className="transform-gpu" style={{ transform: 'scale(0.55)', transformOrigin: 'top center' }}>
+                        <ResumePreview
+                          resumeData={optimizedResume}
+                          userType={userType}
+                          exportOptions={exportOptions}
+                          showControls={false}
+                          defaultZoom={0.98}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
+                    <div className="bg-gradient-to-r from-slate-800/80 to-slate-900/80 p-4 border-b border-slate-700/50">
+                      <h2 className="text-lg font-semibold text-white flex items-center">
+                        <FileText className="w-4 h-4 mr-2 text-emerald-400" />
+                        Export
+                      </h2>
+                    </div>
+                    <div className="p-4">
+                      <ExportButtons
+                        resumeData={optimizedResume}
+                        userType={userType}
+                        onShowProfile={onShowProfile}
+                        walletRefreshKey={walletRefreshKey}
+                        exportOptions={exportOptions}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {optimizedResume && editorMode === 'preview' && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left Panel - Export Settings */}
                 <div className="space-y-6">
                   <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
                     <div className="bg-gradient-to-r from-slate-800/80 to-slate-900/80 p-4 border-b border-slate-700/50">
@@ -1284,11 +1362,8 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
                       />
                     </div>
                   </div>
-                  
-                  {/* REMOVED: User Actions Required for 90%+ Score - Simplified UX */}
                 </div>
 
-                {/* Right Panel - Sticky Resume Preview */}
                 <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
                   {jdOptimizationResult && (
                     <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden p-5">
@@ -1309,7 +1384,7 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
                       compact={true}
                     />
                   )}
-                  
+
                   <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
                     <ResumePreviewControls
                       zoom={previewZoom}
@@ -1321,12 +1396,9 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
                       maxZoom={MAX_ZOOM}
                     />
                     <div className="bg-slate-800/20 p-4 flex items-center justify-center" style={{ minHeight: '600px' }}>
-                      <div 
+                      <div
                         className="transform-gpu"
-                        style={{ 
-                          transform: `scale(${previewZoom})`, 
-                          transformOrigin: 'top center'
-                        }}
+                        style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center' }}
                       >
                         <ResumePreview
                           resumeData={optimizedResume}
