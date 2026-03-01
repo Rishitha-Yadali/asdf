@@ -92,8 +92,8 @@ const ExportResumeModal: React.FC<ExportResumeModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col bg-slate-950/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700/60 bg-slate-900/90">
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-slate-700/60 bg-slate-900/90">
+        <h2 className="text-base md:text-lg font-semibold text-white flex items-center gap-2">
           <FileText className="w-5 h-5 text-emerald-400" />
           Export Resume
         </h2>
@@ -105,8 +105,8 @@ const ExportResumeModal: React.FC<ExportResumeModalProps> = ({
         </button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 overflow-auto bg-slate-800/30 flex items-start justify-center p-6">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <div className="hidden md:flex flex-1 overflow-auto bg-slate-800/30 items-start justify-center p-6">
           <div
             className="transform-gpu bg-white shadow-2xl rounded"
             style={{ transform: 'scale(0.75)', transformOrigin: 'top center' }}
@@ -121,8 +121,8 @@ const ExportResumeModal: React.FC<ExportResumeModalProps> = ({
           </div>
         </div>
 
-        <div className="w-[360px] flex-shrink-0 border-l border-slate-700/60 bg-slate-900/80 flex flex-col overflow-y-auto">
-          <div className="p-5 space-y-6 flex-1">
+        <div className="flex-1 md:flex-none md:w-[360px] flex-shrink-0 md:border-l border-slate-700/60 bg-slate-900/80 flex flex-col overflow-y-auto">
+          <div className="p-4 md:p-5 space-y-5 md:space-y-6 flex-1">
             <div>
               <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
                 Paper Size
@@ -269,7 +269,7 @@ const ExportResumeModal: React.FC<ExportResumeModalProps> = ({
             </div>
           </div>
 
-          <div className="p-5 border-t border-slate-700/60 space-y-3">
+          <div className="p-4 md:p-5 border-t border-slate-700/60 space-y-3">
             {exportMsg && (
               <div
                 className={`text-xs text-center py-1.5 rounded-lg ${

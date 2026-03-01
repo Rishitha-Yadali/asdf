@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, ArrowLeft, Loader2, CheckCircle, AlertCircle, Send, BarChart3, Pencil, Eye, Download } from 'lucide-react';
-import { exportToPDF, exportToWord } from '../utils/exportUtils';
+import { FileText, ArrowLeft, CheckCircle, Send, BarChart3, Pencil, Eye, Download } from 'lucide-react';
 import { ResumeData, UserType } from '../types/resume';
 import { ExportOptions, defaultExportOptions } from '../types/export';
 import type { OptimizationSessionResult } from '../services/optimizationLoopController';
@@ -36,6 +35,10 @@ interface MobileOptimizedInterfaceProps {
     improvement: number;
   } | null;
   onEditResume?: () => void;
+  onExportResume?: () => void;
+  editorMode?: 'preview' | 'edit';
+  onEditorModeChange?: (mode: 'preview' | 'edit') => void;
+  resumeEditor?: React.ReactNode;
 }
 
 export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> = ({
@@ -46,79 +49,30 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
   onApplyNow,
   jdOptimizationResult,
   parameter16Scores,
-  onEditResume
+  onEditResume,
+  onExportResume,
+  editorMode = 'preview',
+  onEditorModeChange,
+  resumeEditor
 }) => {
   const hasScores = !!(jdOptimizationResult || parameter16Scores);
   const [activeTab, setActiveTab] = useState<'preview' | 'scores' | 'export'>('preview');
-  const [isExportingPDF, setIsExportingPDF] = useState(false);
-  const [isExportingWord, setIsExportingWord] = useState(false);
-  const [exportStatus, setExportStatus] = useState<{
-    type: 'pdf' | 'word' | null;
-    status: 'success' | 'error' | null;
-    message: string;
-  }>({ type: null, status: null, message: '' });
+  const isEditing = editorMode === 'edit';
 
   const resumeSection = sections.find(s => s.id === 'resume');
-  const resumeData = resumeSection?.resumeData;
-  const userType = resumeSection?.userType || 'experienced';
 
-  const handleExportPDF = async () => {
-    if (!resumeData || isExportingPDF || isExportingWord) return;
-    
-    setIsExportingPDF(true);
-    setExportStatus({ type: null, status: null, message: '' });
-    
-    try {
-      await exportToPDF(resumeData, userType, exportOptions);
-      setExportStatus({
-        type: 'pdf',
-        status: 'success',
-        message: 'PDF downloaded successfully!'
-      });
-      setTimeout(() => setExportStatus({ type: null, status: null, message: '' }), 3000);
-    } catch (error) {
-      setExportStatus({
-        type: 'pdf',
-        status: 'error',
-        message: 'PDF export failed. Please try again.'
-      });
-      setTimeout(() => setExportStatus({ type: null, status: null, message: '' }), 5000);
-    } finally {
-      setIsExportingPDF(false);
-    }
-  };
-
-  const handleExportWord = async () => {
-    if (!resumeData || isExportingWord || isExportingPDF) return;
-    
-    setIsExportingWord(true);
-    setExportStatus({ type: null, status: null, message: '' });
-    
-    try {
-      exportToWord(resumeData, userType);
-      setExportStatus({
-        type: 'word',
-        status: 'success',
-        message: 'Word document downloaded successfully!'
-      });
-      setTimeout(() => setExportStatus({ type: null, status: null, message: '' }), 3000);
-    } catch (error) {
-      setExportStatus({
-        type: 'word',
-        status: 'error',
-        message: 'Word export failed. Please try again.'
-      });
-      setTimeout(() => setExportStatus({ type: null, status: null, message: '' }), 5000);
-    } finally {
-      setIsExportingWord(false);
+  const handleEditToggle = () => {
+    if (isEditing) {
+      onEditorModeChange?.('preview');
+    } else {
+      onEditResume?.();
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-[#020617] pb-24">
-      {/* Header */}
       <div className="bg-slate-900/95 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-40">
-        <div className="px-4 py-4">
+        <div className="px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => {
               if (confirm('Start a new resume? Current progress will be cleared.')) {
@@ -129,53 +83,97 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
             style={{ minHeight: '44px' }}
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="text-base font-medium">Create New Resume</span>
+            <span className="text-sm font-medium">New Resume</span>
           </button>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-slate-800/60 rounded-lg border border-slate-700/50 p-0.5">
+              <button
+                onClick={() => {
+                  onEditorModeChange?.('preview');
+                  setActiveTab('preview');
+                }}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${
+                  !isEditing
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    : 'text-slate-400'
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                Preview
+              </button>
+              <button
+                onClick={handleEditToggle}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${
+                  isEditing
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    : 'text-slate-400'
+                }`}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex border-t border-slate-700/50">
-          <button
-            onClick={() => setActiveTab('preview')}
-            className={`flex-1 py-4 text-base font-medium transition-colors ${
-              activeTab === 'preview'
-                ? 'text-emerald-400 border-b-2 border-emerald-400'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            style={{ minHeight: '44px' }}
-          >
-            Preview
-          </button>
-          {hasScores && (
+        {!isEditing && (
+          <div className="flex border-t border-slate-700/50">
             <button
-              onClick={() => setActiveTab('scores')}
-              className={`flex-1 py-4 text-base font-medium transition-colors ${
-                activeTab === 'scores'
+              onClick={() => setActiveTab('preview')}
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'preview'
                   ? 'text-emerald-400 border-b-2 border-emerald-400'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               style={{ minHeight: '44px' }}
             >
-              Scores
+              Preview
             </button>
-          )}
-          <button
-            onClick={() => setActiveTab('export')}
-            className={`flex-1 py-4 text-base font-medium transition-colors ${
-              activeTab === 'export'
-                ? 'text-emerald-400 border-b-2 border-emerald-400'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            style={{ minHeight: '44px' }}
-          >
-            Download
-          </button>
-        </div>
+            {hasScores && (
+              <button
+                onClick={() => setActiveTab('scores')}
+                className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                  activeTab === 'scores'
+                    ? 'text-emerald-400 border-b-2 border-emerald-400'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+                style={{ minHeight: '44px' }}
+              >
+                Scores
+              </button>
+            )}
+            <button
+              onClick={() => setActiveTab('export')}
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'export'
+                  ? 'text-emerald-400 border-b-2 border-emerald-400'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              style={{ minHeight: '44px' }}
+            >
+              Download
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="px-4 py-6">
-        {activeTab === 'scores' && hasScores ? (
+      <div className="px-4 py-4">
+        {isEditing ? (
+          <div className="space-y-4">
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700/50 overflow-hidden">
+              {resumeEditor}
+            </div>
+
+            <button
+              onClick={onExportResume}
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/10 transition-all duration-300"
+            >
+              <Download className="w-5 h-5" />
+              Export Resume
+            </button>
+          </div>
+        ) : activeTab === 'scores' && hasScores ? (
           <div className="space-y-4">
             <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-700/50 p-4">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center">
@@ -200,157 +198,78 @@ export const MobileOptimizedInterface: React.FC<MobileOptimizedInterfaceProps> =
             </div>
           </div>
         ) : activeTab === 'preview' ? (
-          <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-700/50 p-3 sm:p-4">
-            <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center">
-              <FileText className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-emerald-400" />
+          <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-700/50 p-3">
+            <h2 className="text-base font-bold text-white mb-3 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-emerald-400" />
               Your Optimized Resume
             </h2>
-            {/* Mobile-optimized resume preview - matches desktop view exactly */}
-            <div 
+            <div
               className="relative w-full bg-slate-800/50 rounded-xl overflow-hidden border border-slate-600/50"
-              style={{ 
-                height: 'calc(100vh - 260px)',
-                minHeight: '500px'
+              style={{
+                height: 'calc(100vh - 300px)',
+                minHeight: '450px'
               }}
             >
-              {/* Scrollable container with pinch-zoom support */}
-              <div 
+              <div
                 className="w-full h-full overflow-auto flex items-start justify-center p-4"
-                style={{
-                  WebkitOverflowScrolling: 'touch'
-                }}
+                style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                {/* Resume container - scaled to fit mobile like desktop */}
-                <div 
+                <div
                   className="transform-gpu"
                   style={{
                     transform: 'scale(0.45)',
                     transformOrigin: 'top center',
-                    minWidth: '210mm' // A4 width to match desktop
+                    minWidth: '210mm'
                   }}
                 >
                   {resumeSection?.component}
                 </div>
               </div>
             </div>
-            <p className="text-xs text-slate-400 text-center mt-2 sm:mt-3">
+            <p className="text-xs text-slate-400 text-center mt-2">
               Scroll to view full resume
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Success Message */}
-            <div className="bg-gradient-to-r from-emerald-900/30 to-green-900/30 rounded-2xl p-6 border border-emerald-500/30">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                  <CheckCircle className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white mb-1">
-                    Resume Ready!
-                  </h3>
-                  <p className="text-base text-slate-300">
-                    {jobContext?.fromJobApplication && jobContext?.roleTitle
-                      ? `Optimized for ${jobContext.roleTitle}${jobContext.companyName ? ` at ${jobContext.companyName}` : ''}`
-                      : 'Your resume has been optimized and is ready to download.'}
-                  </p>
-                </div>
-              </div>
-
-              {jobContext?.fromJobApplication && onApplyNow && (
-                <button
-                  onClick={onApplyNow}
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg shadow-emerald-500/20"
-                  style={{ minHeight: '56px', fontSize: '18px' }}
-                >
-                  <Send className="w-6 h-6" />
-                  <span>Apply Now</span>
-                </button>
-              )}
-            </div>
-
-            {/* Action Buttons - Edit & Export */}
-            {onEditResume && (
-              <button
-                onClick={onEditResume}
-                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-emerald-500/30 text-white font-semibold rounded-xl transition-all duration-300"
-                style={{ minHeight: '52px', fontSize: '16px' }}
-              >
-                <Pencil className="w-5 h-5 text-emerald-400" />
-                <span>Edit Resume</span>
-              </button>
-            )}
-
-            {/* Download Buttons */}
-            <div className="space-y-4">
-              <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Download className="w-5 h-5 text-emerald-400" />
-                  Export Resume
-                </h3>
-
-                <button
-                  onClick={handleExportPDF}
-                  disabled={isExportingPDF || isExportingWord}
-                  className="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg shadow-red-500/20 mb-4"
-                  style={{ minHeight: '56px', fontSize: '18px' }}
-                >
-                  {isExportingPDF ? (
-                    <>
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                      <span>Generating PDF...</span>
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="w-6 h-6" />
-                      <span>Download PDF</span>
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={handleExportWord}
-                  disabled={isExportingWord || isExportingPDF}
-                  className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg shadow-blue-500/20"
-                  style={{ minHeight: '56px', fontSize: '18px' }}
-                >
-                  {isExportingWord ? (
-                    <>
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                      <span>Generating Word...</span>
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="w-6 h-6" />
-                      <span>Download Word</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {exportStatus.status && (
-                <div className={`p-4 rounded-xl border ${
-                  exportStatus.status === 'success'
-                    ? 'bg-emerald-900/30 border-emerald-500/30'
-                    : 'bg-red-900/30 border-red-500/30'
-                }`}>
-                  <div className="flex items-center space-x-3">
-                    {exportStatus.status === 'success' ? (
-                      <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-                    ) : (
-                      <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
-                    )}
-                    <span className={`text-base font-medium ${
-                      exportStatus.status === 'success'
-                        ? 'text-emerald-300'
-                        : 'text-red-300'
-                    }`}>
-                      {exportStatus.message}
-                    </span>
+          <div className="space-y-4">
+            {jobContext?.fromJobApplication && jobContext?.roleTitle && (
+              <div className="bg-gradient-to-r from-emerald-900/30 to-green-900/30 rounded-xl p-4 border border-emerald-500/30">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-white mb-1">Resume Ready!</h3>
+                    <p className="text-sm text-slate-300">
+                      Optimized for {jobContext.roleTitle}{jobContext.companyName ? ` at ${jobContext.companyName}` : ''}
+                    </p>
                   </div>
                 </div>
-              )}
-            </div>
+                {onApplyNow && (
+                  <button
+                    onClick={onApplyNow}
+                    className="w-full mt-3 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/20"
+                    style={{ minHeight: '48px' }}
+                  >
+                    <Send className="w-5 h-5" />
+                    <span>Apply Now</span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            <button
+              onClick={onExportResume}
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all duration-300"
+              style={{ minHeight: '56px', fontSize: '16px' }}
+            >
+              <Download className="w-5 h-5" />
+              Export Resume (PDF / Word)
+            </button>
+
+            <p className="text-xs text-slate-400 text-center">
+              Choose font, paper size, template, and spacing before downloading
+            </p>
           </div>
         )}
       </div>

@@ -1064,12 +1064,11 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
         title: 'Optimized Resume',
         icon: <FileText className="w-5 h-5" />,
         component: (
-          // ResumePreview with exportOptions to apply font/style changes
-          <ResumePreview 
-            resumeData={optimizedResume} 
-            userType={userType} 
+          <ResumePreview
+            resumeData={optimizedResume}
+            userType={userType}
             exportOptions={exportOptions}
-            defaultZoom={0.98} 
+            defaultZoom={0.98}
           />
         ),
         resumeData: optimizedResume,
@@ -1077,16 +1076,33 @@ const checkForMissingSections = useCallback((resumeData: ResumeData): string[] =
       }
     ];
     return (
-      <MobileOptimizedInterface
-        sections={mobileSections}
-        onStartNewResume={handleStartNewResume}
-        exportOptions={exportOptions}
-        jobContext={jobContext}
-        onApplyNow={() => handleExternalApply(optimizedResume)}
-        jdOptimizationResult={jdOptimizationResult}
-        parameter16Scores={parameter16Scores}
-        onEditResume={() => setEditorMode('edit')}
-      />
+      <>
+        <MobileOptimizedInterface
+          sections={mobileSections}
+          onStartNewResume={handleStartNewResume}
+          exportOptions={exportOptions}
+          jobContext={jobContext}
+          onApplyNow={() => handleExternalApply(optimizedResume)}
+          jdOptimizationResult={jdOptimizationResult}
+          parameter16Scores={parameter16Scores}
+          onEditResume={() => setEditorMode('edit')}
+          onExportResume={() => setShowExportModal(true)}
+          editorMode={editorMode}
+          onEditorModeChange={setEditorMode}
+          resumeEditor={
+            <ResumeEditor
+              resumeData={optimizedResume}
+              onUpdate={(updated) => setOptimizedResume(updated)}
+            />
+          }
+        />
+        <ExportResumeModal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          resumeData={optimizedResume}
+          userType={userType}
+        />
+      </>
     );
   }
 
